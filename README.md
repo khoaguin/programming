@@ -1,4 +1,5 @@
 # Programming
+![banner](./images/banner.png)
 A Learning Journal on Programming
 
 ## Contents
