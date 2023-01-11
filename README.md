@@ -1,7 +1,7 @@
 # Programming
-![banner](./images/banner.png)
+![banner](./images/banner2.png)
+
 A Learning Journal on Programming
 
 ## Contents
-- [Data Structure & Algorithms Specialization - Coursera](./data-structures-algorithms-coursera/)
 - [The Rust Programming Language](./rust-book/)
