@@ -147,10 +147,12 @@ if __name__ == "__main__":
     """
     The client code can work with any concrete factory class.
     """
-    print("Client: Testing client code with the first factory type:")
+    print("Client: Testing client code with the first factory type (WinFactory):")
     client_code(WinFactory())
 
     print("\n")
 
-    print("Client: Testing the same client code with the second factory type:")
+    print(
+        "Client: Testing the same client code with the second factory type (MacFactory):"
+    )
     client_code(MacFactory())
