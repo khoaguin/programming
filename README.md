@@ -1,6 +1,6 @@
 # Programming
 
-![banner](./images/banner2.png)
+![banner](./images/banner3.png)
 
 A Learning Journal on Programming
 
