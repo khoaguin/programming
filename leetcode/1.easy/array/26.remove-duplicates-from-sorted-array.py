@@ -10,6 +10,9 @@ from typing import List
 
 class Solution:
     def removeDuplicates(self, nums: List[int]) -> int:
+        """
+        My solution: Using Python's set
+        """
         s = set(nums)
         nums[:] = sorted(s)
         return len(nums)
