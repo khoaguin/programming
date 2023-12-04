@@ -46,7 +46,7 @@ class Solution:
         """
         Even better yet solution
         Runtime beats 99.43 % of python3 submissions (O(n))
-        Memory usage beats 35.57 % of python3 submissions (O(1))
+        Memory usage beats 35.57 % of python3 submissions (O(1) since no extra DS used)
         """
         lp = 0  # left pointer
         rp = len(s) - 1  # right pointer
