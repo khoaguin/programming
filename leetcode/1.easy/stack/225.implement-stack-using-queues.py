@@ -27,11 +27,13 @@ class MyStack:
         return not bool(len(self.data))
 
 
-# if __name__ == "__main__":
-#     # Your MyStack object will be instantiated and called as such:
-#     obj = MyStack()
-#     obj.push(1)
-#     param_2 = obj.pop()
-#     param_3 = obj.top()
-#     param_4 = obj.empty()
+if __name__ == "__main__":
+    #     # Your MyStack object will be instantiated and called as such:
+    myStack = MyStack()
+    myStack.push(1)
+    myStack.push(2)
+    print(myStack.data)
+    print(myStack.top())  # return 2
+    print(myStack.pop())  # return 2
+    print(myStack.empty())  # return False
 # @lc code=end
