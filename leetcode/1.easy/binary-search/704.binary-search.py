@@ -12,6 +12,8 @@ class Solution:
     def search(self, nums: List[int], target: int) -> int:
         """
         Recursive solution
+            Runtime: O(log n) - beats 95.46 % of python3 submissions
+            Mem: beats 15.51 % of python3 submissions (18 MB)
         """
 
         def binary_search(
