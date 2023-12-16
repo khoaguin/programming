@@ -14,6 +14,14 @@
 #         self.right = right
 class Solution:
     def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        """
+        Recursive DFS solution. For each node, it swaps the left and right
+        children and then recurses on these children.
+        Run time: O(n) - we visit every node once.
+        Space complexity: Max size of the recursion stack equals to the depth of the tree
+            The worst case is O(n) - the  that the tree is linear
+            For a balanced tree, it would be O(log n).
+        """
         if root:
             root.right, root.left = self.invertTree(root.left), self.invertTree(
                 root.right
