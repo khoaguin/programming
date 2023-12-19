@@ -25,10 +25,12 @@ class MajorDomoClient(object):
     client = None
     poller = None
     timeout = 2500
-    retries = 3
     verbose = False
 
     def __init__(self, broker, verbose=False):
+        """
+        Initialize needed variables, then connect to the broker
+        """
         self.broker = broker
         self.verbose = verbose
         self.ctx = zmq.Context()
@@ -45,7 +47,7 @@ class MajorDomoClient(object):
         if self.client:
             self.poller.unregister(self.client)
             self.client.close()
-        self.client = self.ctx.socket(zmq.REQ)
+        self.client = self.ctx.socket(zmq.DEALER)
         self.client.linger = 0
         self.client.connect(self.broker)
         self.poller.register(self.client, zmq.POLLIN)
@@ -53,57 +55,46 @@ class MajorDomoClient(object):
             logging.info("I: connecting to broker at %s...", self.broker)
 
     def send(self, service, request):
-        """Send request to broker and get reply by hook or crook.
-
-        Takes ownership of request message and destroys it when sent.
-        Returns the reply message or None if there was no reply.
-        """
+        """Send request to broker"""
         if not isinstance(request, list):
             request = [request]
-        request = [MDP.C_CLIENT, service] + request
+
+        # Prefix request with protocol frames
+        # Frame 0: empty (REQ emulation)
+        # Frame 1: "MDPCxy" (six bytes, MDP/Client x.y)
+        # Frame 2: Service name (printable string)
+
+        request = [b"", MDP.C_CLIENT, service] + request
         if self.verbose:
             logging.warn("I: send request to '%s' service: ", service)
             dump(request)
-        reply = None
+        self.client.send_multipart(request)
 
-        retries = self.retries
-        while retries > 0:
-            self.client.send_multipart(request)
-            try:
-                items = self.poller.poll(self.timeout)
-            except KeyboardInterrupt:
-                break  # interrupted
+    def recv(self):
+        """Returns the reply message or None if there was no reply."""
+        try:
+            items = self.poller.poll(self.timeout)
+        except KeyboardInterrupt:
+            return  # interrupted
 
-            if items:
-                msg = self.client.recv_multipart()
-                if self.verbose:
-                    logging.info("I: received reply:")
-                    dump(msg)
+        if items:
+            # if we got a reply, process it
+            msg = self.client.recv_multipart()
+            if self.verbose:
+                logging.info("I: received reply:")
+                dump(msg)
 
-                # Don't try to handle errors, just assert noisily
-                assert len(msg) >= 3
+            # Don't try to handle errors, just assert noisily
+            assert len(msg) >= 4
 
-                header = msg.pop(0)
-                assert MDP.C_CLIENT == header
+            empty = msg.pop(0)
+            header = msg.pop(0)
+            assert MDP.C_CLIENT == header
 
-                reply_service = msg.pop(0)
-                assert service == reply_service
-
-                reply = msg
-                break
-            else:
-                if retries:
-                    logging.warn("W: no reply, reconnecting...")
-                    self.reconnect_to_broker()
-                else:
-                    logging.warn("W: permanent error, abandoning")
-                    break
-                retries -= 1
-
-        return reply
-
-    def destroy(self):
-        self.context.destroy()
+            service = msg.pop(0)
+            return msg
+        else:
+            logging.warn("W: permanent error, abandoning request")
 
 
 def main():
