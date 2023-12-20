@@ -36,5 +36,16 @@ class Solution:
 
         return find_max_depth(root, 0)
 
+    def maxDepth(self, root: Optional[TreeNode]):
+        """
+        Simpler code
+            Run time beats 93.67% of users with Python3
+            Memory beats 22.12% of users with Python3
+        """
+        if not root:
+            return 0
+        else:
+            return max(self.depth(root.left), self.depth(root.right)) + 1
+
 
 # @lc code=end
