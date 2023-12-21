@@ -13,12 +13,11 @@
 #         self.left = left
 #         self.right = right
 class Solution:
-    is_same = True
-
     def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
         """
         Given the roots of two binary trees p and q, write a function to check if they are the same or not.
-        If roots are not None and same, recursively check if the left nodes and right nodes of the trees are same. If we reach the termination nodes of both trees, return True
+        If roots are not None and same, recursively check if the left nodes and right nodes of the trees are same.
+        If we reach the termination nodes of both trees, return True
         Run time: Worst case is O(n) since we visit each node once
                   Best case is when we find a mismatch and return early
                   Beats 50.12% of users with Python3
