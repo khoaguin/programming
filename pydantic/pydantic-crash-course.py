@@ -9,7 +9,7 @@ class Level(Enum):
     INTERMEDIATE = 2
     ADVANCED = 3
 
-    
+
 class Student(BaseModel):
     first_name: str
     last_name: str
@@ -34,7 +34,7 @@ student = Student(
     last_name="Potter",
     age=19,
     date_joined=datetime.date(2020, 1, 1),
-    level=Level.ADVANCED
+    level=Level.ADVANCED,
 )
 
 print(student)

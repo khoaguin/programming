@@ -23,7 +23,9 @@ class Solution:
     def binaryTreePaths(self, root: Optional[TreeNode]) -> List[str]:
         def dfs(root: TreeNode, cur_path: str, paths: List):
             """
-            Pre-order traversal
+            Using modified pre-order DFS traversal.
+            Note: No backtracking used, but using a check to solve
+                (only add value to current path if a node is not leaf)
             """
             if root is None:
                 return
