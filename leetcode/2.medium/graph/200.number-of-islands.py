@@ -6,17 +6,22 @@
 
 # @lc code=start
 from collections import deque
-from typing import List, Tuple
+from typing import List, Set, Tuple
 
 
 class Solution:
+    """
+    First solution: Works but is too slow. Reasons:
+        -
+    """
+
     def numIslands(self, grid: List[List[str]]) -> int:
         """
-        Using BFS to traverse through all the grid node
+        Using BFS to traverse through the grid
         We need to check if a node is already explored and
             if it belongs to an existing island / a new island / water
         Using collections.deque to keep track of the nodes to visit
-            since deque.append() and .popleft() are O(1)
+            since deque's append() and popleft() methods are O(1)
         maximum neighboring lands of a (i,j) land is 4 lands
             (since only horizontally and vertically):
             (i, j+1), (i, j-1), (i+1, j), (i-1, j)
@@ -24,31 +29,69 @@ class Solution:
         if len(grid) == 0 or len(grid[0]) == 0:
             return 0
 
-        def bfs() -> None:
-            visited = set()
-            to_visit = deque()
-            i, j = 0, 0
-            to_visit.append(grid[i][j])
+        def bfs(starting_idx: Tuple[int]) -> Tuple[Set[Tuple[int]], bool]:
+            visited = set()  # keep the set of visited indices in the grid
+            to_visit = deque()  # keep the queue of nodes' indices to visit in the grid
+            to_visit.append(starting_idx)
+            first_node = grid[starting_idx[0]][starting_idx[1]]
+            on_land = True if first_node == "1" else False
             while len(to_visit) > 0:
-                current_node = to_visit.popleft()
-                print(current_node)
-                visited.add(current_node)
-                for neighboring_idx in neighboring_indices(i, j):
-                    neighbor = grid[neighboring_idx[0]][neighboring_idx[1]]
-                    print(f"{neighbor = }")
-                    if neighbor not in visited:
-                        to_visit.append(neighbor)
+                # visit a node
+                current_node_idx = to_visit.popleft()
+                current_node_value = grid[current_node_idx[0]][current_node_idx[1]]
+                # print(f"visiting node {current_node_value} at idx {current_node_idx}")
+                visited.add(current_node_idx)
+                # visit the neigboring nodes (if they are not yet visited)
+                for neighboring_idx in neighbors(current_node_idx, grid, on_land):
+                    # print(f"{neighboring_idx = }")
+                    if neighboring_idx not in visited:
+                        to_visit.append(neighboring_idx)
+            return visited, on_land
 
-        def neighboring_indices(i, j) -> List[Tuple]:
-            print(f"finding neighboring_indices{(i, j)}")
-            all_neighboring_indices = [(i, j + 1), (i, j - 1), (i + 1, j), (i - 1, j)]
-            return [idx for idx in all_neighboring_indices if is_valid(idx[0], idx[1])]
+        def neighbors(
+            idx: Tuple[int], grid: List[List[str]], on_land: bool
+        ) -> List[Tuple]:
+            """
+            Given the index tuple of a node on the grid, return its neighboring indices
+            """
+            (i, j) = idx
+            neighboring_indices = [(i, j - 1), (i - 1, j), (i, j + 1), (i + 1, j)]
+            inside_grid_neighbors = [
+                idx for idx in neighboring_indices if inside_grid(idx, grid)
+            ]
+            valid_neighbors = []
+            for idx in inside_grid_neighbors:
+                ni, nj = idx
+                if on_land:
+                    if grid[ni][nj] == "1":
+                        valid_neighbors.append(idx)
+                else:
+                    if grid[ni][nj] == "0":
+                        valid_neighbors.append(idx)
+            return valid_neighbors
 
-        def is_valid(i, j) -> bool:
-            return i >= 0 and j >= 0 and i < len(grid[0]) and j < len(grid[1])
+        def inside_grid(idx: Tuple[int], grid: List[List[str]]) -> bool:
+            (i, j) = idx
+            return i >= 0 and j >= 0 and i < len(grid) and j < len(grid[0])
 
-        print(bfs())
-        return 1
+        # get the set of all indices in the grid
+        to_visit = set(
+            [(i, j) for i, row in enumerate(grid) for j, _ in enumerate(row)]
+        )
+        num_islands = 0
+        while len(to_visit) > 0:
+            start_indx = to_visit.pop()
+            visited, on_land = bfs(
+                starting_idx=start_indx
+            )  # start at the origin. Can be any index
+
+            print(f"{start_indx = }, {visited = }, {on_land = }")
+            if on_land:
+                num_islands += 1
+            to_visit -= visited
+            print(f"{to_visit = }")
+
+        return num_islands
 
 
 s = Solution()
@@ -58,7 +101,7 @@ grid = [
     ["1", "1", "0", "0", "0"],
     ["0", "0", "0", "0", "0"],
 ]
-s.numIslands(grid)
+print(s.numIslands(grid))
 
 # grid = [
 #     ["1", "1", "0", "0", "0"],
@@ -66,6 +109,6 @@ s.numIslands(grid)
 #     ["0", "0", "1", "0", "0"],
 #     ["0", "0", "0", "1", "1"],
 # ]
-# s.numIslands(grid)
+# print(s.numIslands(grid))
 
 # @lc code=end
