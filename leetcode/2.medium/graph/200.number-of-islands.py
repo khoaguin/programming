@@ -97,7 +97,7 @@ class Solution:
 class Solution:
     """
     DFS Solution: Iterate through all the nodes on the grid. If the node is land,
-                use DFS to explore connected lands
+        use DFS to explore connected lands. Remember to mark the visited lands
     Time Complexity: O(h*w) where h and w are the height and width of the grid
         The reason is that in the worst case, for each node, we may use DFS to visit all
         other nodes, e.g. imagine all nodes are land
@@ -129,6 +129,58 @@ class Solution:
                 if grid[i][j] == "1":
                     # print(f"Finding land at ({i}, {j}). Exploring neighboring nodes")
                     dfs(i, j, grid)
+                    num_islands += 1
+        return num_islands
+
+
+class Solution:
+    """
+    Optimized BFS solution: Make sure that each node is only visited once and
+        only run BFS when we find out a land node is the start node of an unvisited island
+        1. Iterate over the grid: Go through each cell in the grid.
+        2. Check for Unvisited Land: When you find a land cell ("1") that hasn't been
+            visited, it indicates the start of a new island.
+        3. Perform BFS: Use BFS to explore the entire island starting from this cell.
+        4. Mark Visited Cells: During BFS, mark each visited cell to avoid revisiting it.
+        5. Count Islands: Each BFS initiation counts as discovering a new island.
+    Time Complexity: O(M*N), where M is the number of rows and N is the number of
+        columns in the grid. Each cell is visited at most once.
+    Space Complexity: O(min(M, N)) in the worst case. The maximum size of the queue
+        (used in BFS) can be the maximum of the width or height of the grid, which
+        happens in a worst-case scenario when the grid is filled with lands.
+    """
+
+    from collections import deque
+    from typing import Set, Tuple
+
+    def numIslands(self, grid: List[List[str]]) -> int:
+        def bfs(i, j, grid, visited) -> None:
+            to_visit = deque()
+            to_visit.append((i, j))
+            while to_visit:
+                i, j = to_visit.popleft()
+                # visit neighboring land nodes
+                neighbors = [(-1, 0), (1, 0), (0, 1), (0, -1)]
+                for n in neighbors:
+                    ni = i + n[0]
+                    nj = j + n[1]
+                    if (
+                        0 <= ni < len(grid)
+                        and 0 <= nj < len(grid[0])
+                        and grid[ni][nj] == "1"
+                        and (ni, nj) not in visited
+                    ):
+                        to_visit.append((ni, nj))
+                        visited.add((ni, nj))
+
+        num_islands = 0
+        visited: Set[Tuple] = set()
+        width, height = len(grid), len(grid[0])
+        for i in range(width):
+            for j in range(height):
+                if grid[i][j] == "1" and (i, j) not in visited:
+                    print(f"Find new land that is a start of an island at ({i}, {j})")
+                    bfs(i, j, grid, visited)
                     num_islands += 1
         return num_islands
 
