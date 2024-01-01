@@ -12,7 +12,7 @@ from typing import List, Set, Tuple
 class Solution:
     """
     First solution: Works but is too slow. Reasons:
-        -
+        - Repeated calls of bfs() on water nodes
     """
 
     def numIslands(self, grid: List[List[str]]) -> int:
@@ -48,6 +48,10 @@ class Solution:
                         to_visit.append(neighboring_idx)
             return visited, on_land
 
+        def inside_grid(idx: Tuple[int], grid: List[List[str]]) -> bool:
+            (i, j) = idx
+            return i >= 0 and j >= 0 and i < len(grid) and j < len(grid[0])
+
         def neighbors(
             idx: Tuple[int], grid: List[List[str]], on_land: bool
         ) -> List[Tuple]:
@@ -70,10 +74,6 @@ class Solution:
                         valid_neighbors.append(idx)
             return valid_neighbors
 
-        def inside_grid(idx: Tuple[int], grid: List[List[str]]) -> bool:
-            (i, j) = idx
-            return i >= 0 and j >= 0 and i < len(grid) and j < len(grid[0])
-
         # get the set of all indices in the grid
         to_visit = set(
             [(i, j) for i, row in enumerate(grid) for j, _ in enumerate(row)]
@@ -94,21 +94,61 @@ class Solution:
         return num_islands
 
 
-s = Solution()
-grid = [
-    ["1", "1", "1", "1", "0"],
-    ["1", "1", "0", "1", "0"],
-    ["1", "1", "0", "0", "0"],
-    ["0", "0", "0", "0", "0"],
-]
-print(s.numIslands(grid))
+class Solution:
+    """
+    DFS Solution: Iterate through all the nodes on the grid. If the node is land,
+                use DFS to explore connected lands
+    Time Complexity: O(h*w) where h and w are the height and width of the grid
+        The reason is that in the worst case, for each node, we may use DFS to visit all
+        other nodes, e.g. imagine all nodes are land
+    Space Complexity: O(h*w) since the space complexity mainly comes from the recursion
+        stack used in DFS. In the worst case (e.g., the grid is entirely land), the
+        depth of the stack can be as large as the number of cells in the grid.
+    """
 
+    def numIslands(self, grid: List[List[str]]) -> int:
+        def dfs(i, j, grid):
+            if (
+                i < 0
+                or j < 0
+                or i >= len(grid)
+                or j >= len(grid[0])
+                or grid[i][j] != "1"
+            ):
+                return
+            grid[i][j] = "#"  # important: mark the land as explored
+            # print(grid)
+            dfs(i, j - 1, grid)
+            dfs(i, j + 1, grid)
+            dfs(i - 1, j, grid)
+            dfs(i + 1, j, grid)
+
+        num_islands = 0
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if grid[i][j] == "1":
+                    # print(f"Finding land at ({i}, {j}). Exploring neighboring nodes")
+                    dfs(i, j, grid)
+                    num_islands += 1
+        return num_islands
+
+
+s = Solution()
 # grid = [
+#     ["1", "1", "1", "1", "0"],
+#     ["1", "1", "0", "1", "0"],
 #     ["1", "1", "0", "0", "0"],
-#     ["1", "1", "0", "0", "0"],
-#     ["0", "0", "1", "0", "0"],
-#     ["0", "0", "0", "1", "1"],
+#     ["0", "0", "0", "0", "0"],
 # ]
 # print(s.numIslands(grid))
+
+grid = [
+    ["1", "1", "0", "0", "0"],
+    ["1", "1", "0", "0", "0"],
+    ["0", "0", "1", "0", "0"],
+    ["0", "0", "0", "1", "1"],
+]
+print(grid)
+print(s.numIslands(grid))
 
 # @lc code=end
