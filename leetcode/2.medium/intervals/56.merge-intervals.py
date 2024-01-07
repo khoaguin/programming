@@ -14,31 +14,30 @@ class Solution:
     def merge(self, intervals: List[List[int]]) -> List[List[int]]:
         """
         Overlapping = when the end of an interval is bigger or equal than
-        the start of another interval appeared later in the list
-        Bruteforce: For each interval, check all later intervals in the list
+        the start of another interval appeared later in the list.
+        Loop through the sorted intervals, take an interval and compare its end with
+        the start of the next interval; as long as they overlap, we update the end to
+        be the max end of the overlapping intervals.
+        Time Complexity: sorted has the complexity of  O(n logn)
+            The loop has time complexity O(n)
+            Hence, the overall time complexity of O(n logn)
+        Space Complexity: The sorted_intervals list takes O(n) space
+            The res list takes O(n) space
+            Hence, the overall space complexity is O(n)
         """
-        merged_indices = []
-        merged_intervals = []
-        i = 0
-        while i < len(intervals):
-            for j in range(i + 1, len(intervals)):
-                if intervals[i][1] >= intervals[j][0]:
-                    print(f"Detecting overlap. Merge {intervals[i]} and {intervals[j]}")
-                    merged = [intervals[i][0], intervals[j][1]]
-                    merged_indices.append((i, j))
-                    merged_intervals.append(merged)
-            i += 1
+        sorted_intervals = sorted(intervals, key=lambda x: x[0])
+        res = []
 
-        for i in merged_indices:
-            # print(i)
-            intervals[i[0]] = merged_intervals[i[0]]
-            del intervals[i[1]]
+        for i in sorted_intervals:
+            if res and res[-1][1] >= i[0]:
+                res[-1][1] = max(i[1], res[-1][1])
+            else:
+                res.append(i)
 
-        return intervals
+        return res
 
 
 s = Solution()
-# s.merge([[1, 4], [4, 5]])
 print(s.merge(intervals=[[1, 3], [2, 6], [8, 10], [15, 18]]))
 print(s.merge(intervals=[[1, 4], [4, 5]]))
 # @lc code=end
