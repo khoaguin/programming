@@ -74,10 +74,10 @@ class Solution:
 
     def maxSubArray(self, nums):
         """
-        Manual DP with Memoization solution: With the recursion approach, we call the function
-            `f` a lot of times. Draw the recursion tree to see.
-            Now, let's make a dp list where dp[mustPick][i] denotes the maximum sum
-                subarray starting from i and mustPick denotes wheter the current
+        Manual DP with Memoization solution: Built upon the the recursion approach, where
+            we call the function `f` a lot of times (draw the recursion tree to see).
+            Now, let's make a dp list for memoization where `dp[mustPick][i]` denotes the
+                maximum sum subarray starting from `i` and `mustPick` denotes wheter the current
                 element must be picked or not.
         Time Complexity: O(n)
         Space Complexity: Worst case O(n)
@@ -87,19 +87,74 @@ class Solution:
         ]  # 0 is False, 1 is True
 
         def f(i: int, must_pick: bool, dp: List[List[int]]) -> int:
-            if i >= len(nums):
+            if i >= len(nums):  # base case
                 return 0 if must_pick else float("-inf")
-            if dp[must_pick][i] != float("-inf"):
+
+            if dp[must_pick][i] != float(
+                "-inf"
+            ):  # already computed: just return the value
                 return dp[must_pick][i]
+
             if must_pick:
                 dp[must_pick][i] = max(nums[i] + f(i + 1, True, dp), 0)
             else:
                 dp[must_pick][i] = max(
                     nums[i] + f(i + 1, True, dp), f(i + 1, False, dp)
                 )
+
             return dp[must_pick][i]
 
         return f(0, False, dp)
+
+    def maxSubArray(self, nums):
+        """
+        DP with Tabulation
+            Use dp[1][i] to denote the maximum subarray ending at i
+            Use dp[0][i] to denote the maximum subarray sumed upto i
+            At each index:
+                - We update dp[1][i] as max between either only choosing
+                    current element `nums[i]` (new subarray) or extending from previous
+                    subarray and also the current element: `dp[1][i-1] + nums[i]`
+                - We update dp[0][i] as max between either the sum of subarray until
+                    the last element (dp[0][i-1]) or until the current element (dp[1][i])
+            Finally, we return the last element of dp[0]: dp[0][-1]
+        Time Complexity: O(n)
+        Space Complexity: O(2n) = O(n)
+        """
+        dp = [[0] * len(nums) for i in (0, 1)]
+        dp[1][0], dp[0][0] = nums[0], nums[0]
+        for i in range(1, len(nums)):
+            dp[1][i] = max(nums[i], nums[i] + dp[1][i - 1])
+            dp[0][i] = max(dp[0][i - 1], dp[1][i])
+        return dp[0][-1]
+
+    def maxSubArray(self, nums):
+        """
+        Optimized DP with Tabulation:
+            The `dp` list is now 1D, and at each index, we make `dp[i]` as the maximum
+            between the current number nums[i], or the sum of num[i] and dp[i-1]
+            Finally we return the maximum of `dp`
+        Time Complexity: O(n)
+        Space Complexity: O(n)
+        """
+        dp = [*nums]  # copy nums
+        for i in range(1, len(nums)):
+            dp[i] = max(nums[i], nums[i] + dp[i - 1])
+        return max(dp)
+
+    def maxSubArray(self, nums):
+        """
+        Kadane's algorithm:
+            Observing the optimized DP with tabulation, we can see that we do not need
+            to keep the `dp` list, but only the current max and the max value until now.
+        Time Complexity: O(n)
+        Space Complexity: O(1)
+        """
+        cur_max, max_till_now = nums[0], nums[0]
+        for i in range(1, len(nums)):
+            cur_max = max(nums[i], nums[i] + cur_max)
+            max_till_now = max(cur_max, max_till_now)
+        return max_till_now
 
 
 s = Solution()
