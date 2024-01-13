@@ -156,10 +156,59 @@ class Solution:
             max_till_now = max(cur_max, max_till_now)
         return max_till_now
 
+    def maxSubArray(self, nums):
+        """
+        Divide and Conquer:
+            The maximum subarray either appears in either one of three places:
+                - entirely in the left-half of array [L, mid-1], OR
+                - entirely in the right-half of array [mid+1, R], OR
+                - in an array consisting of mid element along with some part of left-half
+                and some part of right-half such that these form contiguous subarray
+                ([L', R'] = [L', mid-1] + [mid] + [mid+1, R'], where L' >= L and R' <= R)
+            With the above observation, we can recursively divide the array into sub-problems
+            on the left and right halves and then combine these results on the way back up
+            to find the maximum subarray sum.
+            Time Complexity: O(n logn) - the Master Theorem for Divide and Conquer recurrences.
+            Space Complexity: O(logn)
+        """
+
+        def max_subarray_dac(nums: List, left: int, right: int) -> int:
+            """
+            Find the max subarray that's either in the left-haft, right-haft, or middle
+            according to the divide & conquer algorithm (dac)
+            """
+            # base case
+            if left > right:
+                return -9999999  # so this will never win if we find the max of it
+                # and something else in the recursive return statement
+
+            # recursive case
+            mid = (left + right) // 2
+            left_sum, right_sum, current_sum = 0, 0, 0
+
+            for i in range(mid - 1, left - 1, -1):  # move down from mid to left
+                current_sum += nums[i]
+                left_sum = max(current_sum, left_sum)
+
+            current_sum = 0
+
+            for i in range(mid + 1, right + 1):  # move up from mid to right
+                current_sum += nums[i]
+                right_sum = max(current_sum, right_sum)
+
+            return max(
+                max_subarray_dac(nums, left, mid - 1),
+                max_subarray_dac(nums, mid + 1, right),
+                left_sum + nums[mid] + right_sum,
+            )
+
+        return max_subarray_dac(nums, left=0, right=len(nums) - 1)
+
 
 s = Solution()
-print(s.maxSubArray([-2, 1, -3, 4, -1, 2, 1, -5, 4]))
-print(s.maxSubArray([1]))
-print(s.maxSubArray([5, 4, -1, 7, 8]))
+print(s.maxSubArray([-2, 1, -3, 4, -1, 2, 1, -5, 4]))  # should output 6
+print(s.maxSubArray([1, 2]))  # should output 3
+print(s.maxSubArray([1]))  # should output 1
+print(s.maxSubArray([5, 4, -1, 7, 8]))  # should output 23
 
 # @lc code=end
