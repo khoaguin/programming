@@ -22,4 +22,10 @@ mod tests {
         panic!("Make this test fail");
         // assert_eq!(2 + 2, 5);
     }
+
+    #[test]
+    #[should_panic(expected = "less than or equal to 100")]
+    fn greater_than_100() {
+        assert!(200 < 100);
+    }
 }
