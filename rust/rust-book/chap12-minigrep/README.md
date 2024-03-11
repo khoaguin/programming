@@ -20,4 +20,12 @@ Searches a specified file for a specified string:
 
 ## Running
 
-`cargo run -- searchstring example-filename.txt`
+```bash
+cargo run -- searchstring example-filename.txt
+```
+
+or
+
+```bash
+IGNORE_CASE=1 cargo run -- searchstring example-filename.txt
+```
