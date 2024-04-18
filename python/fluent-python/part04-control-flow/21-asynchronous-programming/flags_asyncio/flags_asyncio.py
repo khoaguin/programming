@@ -44,16 +44,30 @@ async def get_flag(client: AsyncClient, cc: str) -> bytes:
 # end::FLAGS_ASYNCIO_TOP[]
 
 # tag::FLAGS_ASYNCIO_START[]
-def download_many(cc_list: list[str]) -> int:    # <1>
-    return asyncio.run(supervisor(cc_list))      # <2>
+def download_many(cc_list: list[str]) -> int:    
+    """
+    This needs to be a plain function, not a coroutine so it can be passed
+    to and called by the main function from the flags.py module
+    """
+    return asyncio.run(supervisor(cc_list))      # Execute the event loop driving the `supervisor(cc_list)` 
+                                                # coroutine object until it returns.
+                                                # This will block while the event loop runs.
 
 async def supervisor(cc_list: list[str]) -> int:
-    async with AsyncClient() as client:          # <3>
+    async with AsyncClient() as client:  # Asynchronous HTTP client operations in httpx are methods of AsyncClient,
+                                        # which is also an asynchronous context manager: a context manager with asyn‐
+                                        # chronous setup and teardown methods
         to_do = [download_one(client, cc)
-                 for cc in sorted(cc_list)]      # <4>
-        res = await asyncio.gather(*to_do)       # <5>
+                for cc in sorted(cc_list)]      # Build a list of coroutine objects by 
+                                                # calling the `download_one` coroutine once for
+                                                # each flag to be retrieved
+        res = await asyncio.gather(*to_do)       # Wait for the asyncio.gather coroutine, which accepts 
+                                                # one or more awaitable
+                                                # arguments and waits for all of them to complete, 
+                                                # returning a list of results for the
+                                                # given awaitables in the order they were submitted.
 
-    return len(res)                              # <6>
+    return len(res)                              # supervisor returns the length of the list returned by asyncio.gather
 
 if __name__ == '__main__':
     main(download_many)
