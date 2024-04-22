@@ -16,10 +16,17 @@ impl Config {
             return Err("Not enough arguments (at least 3)");
         }
 
-        // using clone to fix the onwership problem. Can be a bit inefficient, but works
-        // for now. This can be improved using closure
-        let query: String = args[1].clone();
-        let file_path: String = args[2].clone();
+        /*
+        using clone to fix the onwership problem since we have a
+        slice with `String` elements in the parameter `args`, but the
+        function `build` does not own `args`.
+        This can be a bit inefficient, but works for now.
+        This can be improved using closure
+        */
+        // let query: String = args[1].clone();
+        // let file_path: String = args[2].clone();
+
+        // improved version using closure
 
         let ignore_case = env::var("IGNORE_CASE").is_ok();
 
