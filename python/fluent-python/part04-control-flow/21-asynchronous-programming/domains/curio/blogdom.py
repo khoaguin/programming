@@ -25,7 +25,8 @@ async def main() -> None:
     async with TaskGroup() as group:
         for domain in domains:
             await group.spawn(probe, domain)  # `TaskGroup.spawn` is how you start a coroutine
-        # Iterating with `async for` over a `TaskGroup` yields `Task` instances as each is completed
+        # Iterating with `async for` over a `TaskGroup` 
+yields `Task` instances as each is completed
         async for task in group:
             domain, found = task.result
             mark = '+' if found else ' '
