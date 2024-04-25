@@ -21,11 +21,11 @@ Searches a specified file for a specified string:
 ## Running
 
 ```bash
-cargo run -- searchstring example-filename.txt
+cargo run -- searchstring poem.txt
 ```
 
 or
 
 ```bash
-IGNORE_CASE=1 cargo run -- searchstring example-filename.txt
+IGNORE_CASE=1 cargo run -- searchstring poem.txt
 ```

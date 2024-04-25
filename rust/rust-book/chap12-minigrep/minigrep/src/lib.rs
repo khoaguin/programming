@@ -9,24 +9,30 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn build(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            // return an error value which is string literals that
-            // have the 'static lifetime
-            return Err("Not enough arguments (at least 3)");
-        }
-
+    pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str> {
         /*
         using clone to fix the onwership problem since we have a
         slice with `String` elements in the parameter `args`, but the
-        function `build` does not own `args`.
+        function `build` does not own `args`. To return ownership of a Config instance,
+        we had to clone the values from the query and file_path fields of C
+        onfig so the Config instance can own its values.
         This can be a bit inefficient, but works for now.
-        This can be improved using closure
         */
         // let query: String = args[1].clone();
         // let file_path: String = args[2].clone();
 
-        // improved version using closure
+        // improved version using closure: now since `args` implements the
+        // `Iterator` trait, we can call `next` on it
+        args.next();
+        let query: String = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string"),
+        };
+
+        let file_path: String = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a file path"),
+        };
 
         let ignore_case = env::var("IGNORE_CASE").is_ok();
 
@@ -59,29 +65,17 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     // data returned by the search function will live as long as the data passed into
     // the search function in the contents argument (with 'a lifetime).
-
-    let mut results = Vec::new();
-
-    for line in contents.lines() {
-        if line.contains(query) {
-            results.push(line);
-        }
-    }
-
-    results
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
 }
 
 pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let query = query.to_lowercase();
-    let mut results = Vec::new();
-
-    for line in contents.lines() {
-        if line.to_lowercase().contains(&query) {
-            results.push(line);
-        }
-    }
-
-    results
+    contents
+        .lines()
+        .filter(|line| line.to_lowercase().contains(&query.to_lowercase()))
+        .collect()
 }
 
 #[cfg(test)]
