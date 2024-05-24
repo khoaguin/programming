@@ -1,6 +1,16 @@
 # Building a Multithreaded Web Server
 
-## Steps
+## How to run
+- `cd` into `hello`
+- `cargo run`
+- Send a request by typing `127.0.0.1:7878` into the browser, it will show
+![](./images/root_path.png)
+- Send a request by typing `127.0.0.1:7878/something` into the browser, it will show
+![](./images/something_path.png)
+
+## Theory
+
+### Steps Outline
 1. Learn a bit about TCP and HTTP.
 2. Listen for TCP connections on a socket.
 3. Parse a small number of HTTP requests.
@@ -51,6 +61,8 @@ where
     - `GET` is the method, e.g. `PUT`, `POST`... `/` is the request URI, and `HTTP/1.1` is the version.
 - After the request line, the remaining lines starting from `Host: 127.0.0.1:7878` onward are headers. `GET` requests have no body.
 
+- Try making a request from a different browser or asking for a different address, such as `127.0.0.1:7878/test`, to see how the request data changes.
+
 #### HTTP Response
 HTTP Responses have the following format:
 
@@ -59,11 +71,17 @@ HTTP-Version Status-Code Reason-Phrase CRLF
 headers CRLF
 message-body
 ```
+Example: A HTTP response with version 1.1, has a status code of 200, an OK reason phrase, no headers, and no body
+```
+HTTP/1.1 200 OK\r\n\r\n
+```
+
 
 ### Terminologies
 - <span style="color:yellow">*Binding*</span>: connecting to a port to listen to is called "binding" to a port.
 - <span style="color:yellow">*Connection*</span>: connection is the name for the full request and response process in which a client connects to the server, the server generates a response, and the server closes the connection
 - <span style="color:yellow">*Stream*</span>: a stream represents an open connection between the client and the server
+
 
 ### Notes
 - If you send a request to a server, e.g. typing `http://127.0.0.1:7878/` url to your browser, and see the error "This site can’t be reached", it may be that because the server is not currently sending back any data.
