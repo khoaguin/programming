@@ -17,6 +17,11 @@
 4. Create a proper HTTP response.
 5. Improve the throughput of our server with a thread pool.
 
+### Some Network Programming Terminologies
+- <span style="color:yellow">*Binding*</span>: connecting to a port to listen to is called "binding" to a port.
+- <span style="color:yellow">*Connection*</span>: connection is the name for the full request and response process in which a client connects to the server, the server generates a response, and the server closes the connection
+- <span style="color:yellow">*Stream*</span>: a stream represents an open connection between the client and the server
+
 ### TCP and HTTP
 The two main protocols involved in web servers are <span style="color:lightgreen">*Hypertext Transfer Protocol (HTTP)*</span> and <span style="color:lightgreen">*Transmission Control Protocol (TCP)*</span>. Both protocols are <span style="color:lightgreen">*request-response*</span> protocols, meaning a client initiates requests and a server listens to the requests and provides a response to the client. The contents of those requests and responses are defined by the protocols.
 
@@ -76,12 +81,10 @@ Example: A HTTP response with version 1.1, has a status code of 200, an OK reaso
 HTTP/1.1 200 OK\r\n\r\n
 ```
 
+### Thread Pool
+A thread pool is a group of spawned threads that are waiting and ready to handle a task. When the program receives a new task, it assigns one of the threads in the pool to the task, and that thread will process the task. The remaining threads in the pool are available to handle any other tasks that come in while the first thread is processing. When the first thread is done processing its task, it’s returned to the pool of idle threads, ready to handle a new task. A thread pool allows you to process connections concurrently, increasing the throughput of your server.
 
-### Terminologies
-- <span style="color:yellow">*Binding*</span>: connecting to a port to listen to is called "binding" to a port.
-- <span style="color:yellow">*Connection*</span>: connection is the name for the full request and response process in which a client connects to the server, the server generates a response, and the server closes the connection
-- <span style="color:yellow">*Stream*</span>: a stream represents an open connection between the client and the server
-
+We’ll need to limit the number of threads in the pool to a small number to protect the service from Denial of Service (DoS) attacks; if we had our program create a new thread for each request as it came in, someone making 10 million requests to our server could create havoc by using up all our server’s resources and grinding the processing of requests to a halt. With a fixed number of threads in the pool, the thread pool will maintain a queue of incoming requests. Each of the threads in the pool will pop off a request from this queue, handle the request, and then ask the queue for another request.
 
 ### Notes
 - If you send a request to a server, e.g. typing `http://127.0.0.1:7878/` url to your browser, and see the error "This site can’t be reached", it may be that because the server is not currently sending back any data.
