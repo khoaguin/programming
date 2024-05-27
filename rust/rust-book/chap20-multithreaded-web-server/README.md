@@ -2,11 +2,9 @@
 
 ## Singlethreaded vs Multithreaded Web Server 
 
-- Single Threaded Web Server
-![siglethread](./assets/single-threaded.gif)
+- Single Threaded Web Server: The request to `127.0.0.1:7878` is only returned after `127.0.0.1:7878/sleep` is done ![siglethread](./assets/single-threaded.gif)
 
-- Multi Threaded Web Server
-![multithread](./assets/multi-threaded.gif)
+- Multi Threaded Web Server: The request to `127.0.0.1:7878` is returned before `127.0.0.1:7878/sleep` is done ![multithread](./assets/multi-threaded.gif)
 
 
 ## How to run
