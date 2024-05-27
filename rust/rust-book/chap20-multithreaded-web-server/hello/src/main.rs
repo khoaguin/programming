@@ -1,3 +1,4 @@
+use hello::ThreadPool;
 use std::{
     fs,
     io::{prelude::*, BufReader},
@@ -12,13 +13,14 @@ fn main() {
     // bind will also fail if we run two instances of our program that listen to the same port.
     let listener: TcpListener = TcpListener::bind("127.0.0.1:7878").unwrap();
     println!("TCP listener: {:?}", listener);
+    let pool = ThreadPool::new(4);
 
     // The `incoming()` method on `TcpListener` returns an iterator that
     // gives us a sequence of streams (of type `TcpStream`).
     for stream in listener.incoming() {
         let stream = stream.unwrap();
         println!("Connection established with stream: {:?}", stream);
-        thread::spawn(|| {
+        pool.execute(|| {
             handle_connection(stream);
         });
     }
@@ -37,23 +39,21 @@ fn handle_connection(mut stream: TcpStream) {
     // println!("Request: {:#?}", http_request);
 
     // validating the request that if it looks for the `/` (root) path
-    let request_line = buf_reader.lines().next().unwrap().unwrap();  //  the first line of request
-    
+    let request_line = buf_reader.lines().next().unwrap().unwrap(); //  the first line of request
+
     let (status_line, filename) = match &request_line[..] {
         "GET / HTTP/1.1" => ("HTTP/1.1 200 OK", "templates/hello.html"),
         "GET /sleep HTTP/1.1" => {
-            thread::sleep(Duration::from_secs(3));  // Simulating a slow request by sleeping for 3 seconds
+            thread::sleep(Duration::from_secs(3)); // Simulating a slow request by sleeping for 3 seconds
             ("HTTP/1.1 200 OK", "templates/sleep.html")
-        },
+        }
         _ => ("HTTP/1.1 404 NOT FOUND", "templates/404.html"),
     };
 
     let contents = fs::read_to_string(filename).unwrap();
     let length = contents.len();
 
-    let response =
-        format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
+    let response = format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
 
     stream.write_all(response.as_bytes()).unwrap();
-
 }
