@@ -8,9 +8,11 @@ pub struct ThreadPool {
     sender: mpsc::Sender<Job>, // create a channel and hold on to the sender
 }
 
-struct Job; // hold the closures we want to send down the channel
+// hold the reference to the closure we want to send down the channel
+type Job = Box<dyn FnOnce() + Send + 'static>;
 
 impl ThreadPool {
+    /// Create a new ThreadPool with `size` = number of threads in the pool
     pub fn new(size: usize) -> ThreadPool {
         assert!(size > 0);
 
@@ -22,13 +24,14 @@ impl ThreadPool {
         let mut workers = Vec::with_capacity(size);
 
         for id in 0..size {
-            // create some threads and store them in the vector
+            // create some workers and store them in the vector `workers`
             workers.push(Worker::new(id, Arc::clone(&receiver)));
         }
 
         ThreadPool { workers, sender }
     }
 
+    /// send the job we want to execute to the worker through the mpsc sender
     pub fn execute<F>(&self, f: F)
     where
         F: FnOnce() + Send + 'static, // we need Send to transfer the closure from
@@ -37,7 +40,6 @@ impl ThreadPool {
     {
         let job = Box::new(f);
 
-        // send the job it wants to execute through the sender
         self.sender.send(job).unwrap();
     }
 }
