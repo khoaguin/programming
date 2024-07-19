@@ -38,11 +38,12 @@ def twenty_percent_discount(order):
 
 """main function"""
 if __name__ == "__main__":
-
     print(Item(20000))
-    
-    """with discount strategy as 20 % discount"""
-    print(Item(20000, discount_strategy = twenty_percent_discount))
-
-    """with discount strategy as On Sale Discount"""
-    print(Item(20000, discount_strategy = on_sale_discount))
+    # the user decides which discount strategy to use at run time
+    user_input = input("Enter discount strategy (on sale / 20): ")
+    if user_input == "on sale":
+        print(Item(20000, discount_strategy = on_sale_discount))
+    elif user_input == "20":
+        print(Item(20000, discount_strategy = twenty_percent_discount))
+    else:
+        raise ValueError("Invalid discount strategy")
