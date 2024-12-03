@@ -5,6 +5,11 @@ import requests
 import random
 from opentelemetry import trace
 from opentelemetry.trace.status import Status, StatusCode
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import Resource
 
 import requests
 from fastapi import FastAPI
@@ -67,3 +72,19 @@ def external_api():
     response = requests.get(f"https://httpbin.org/delay/{seconds}")
     response.close()
     return "ok"
+
+
+# Configure OpenTelemetry
+# tracer = trace.get_tracer(__name__)
+trace_provider = TracerProvider(
+    resource=Resource.create({"service.name": "my-sample-fastapi-service"})
+)
+# trace.set_tracer_provider(trace_provider)
+span_exporter = OTLPSpanExporter(
+    endpoint="http://localhost:4317", # SigNoz OTel Collector endpoint (gRPC)
+    insecure=True,
+)
+span_processor = BatchSpanProcessor(span_exporter)
+trace_provider.add_span_processor(span_processor)
+
+FastAPIInstrumentor.instrument_app(app=app, tracer_provider=trace_provider)
