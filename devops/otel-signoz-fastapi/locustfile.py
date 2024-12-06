@@ -9,9 +9,9 @@ class QuickstartUser(HttpUser):
     def hello_world(self):
         self.client.get("/", name="/home")
 
-    @task
-    def invalid(self):
-        self.client.get("/invalid", name="/invalid")
+    # @task
+    # def invalid(self):
+    #     self.client.get("/invalid", name="/invalid")
 
     @task(3)
     def view_items(self):

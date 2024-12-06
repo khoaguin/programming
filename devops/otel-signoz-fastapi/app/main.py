@@ -8,7 +8,9 @@ from opentelemetry.trace.status import Status, StatusCode
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+# from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter  # Changed to HTTP exporter
+
 from opentelemetry.sdk.resources import Resource
 
 import requests
@@ -41,9 +43,9 @@ async def read_item(item_id: int, q: str = None):
     return {"item_id": item_id, "q": q}
 
 
-@app.get("/invalid")
-async def invalid():
-    raise ValueError("Invalid ")
+# @app.get("/invalid")
+# async def invalid():
+#     raise ValueError("Invalid ")
 
 @app.get("/exception")
 async def exception():
@@ -81,8 +83,8 @@ trace_provider = TracerProvider(
 )
 # trace.set_tracer_provider(trace_provider)
 span_exporter = OTLPSpanExporter(
-    endpoint="http://localhost:4317", # SigNoz OTel Collector endpoint (gRPC)
-    insecure=True,
+    endpoint="http://localhost:4318/v1/traces", # SigNoz OTel Collector endpoint (gRPC)
+    # endpoint="http://135.224.170.18:4318/v1/traces",
 )
 span_processor = BatchSpanProcessor(span_exporter)
 trace_provider.add_span_processor(span_processor)
