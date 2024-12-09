@@ -40,7 +40,7 @@ receivers:
           system.processes.count:
             enabled: true
   filelog:
-    include: [ /home/dk/Desktop/projects/OpenMined/SyftBox/.server/data/logs/server.log ]  # path to the log file
+    include: ${LOG_FILE_PATH}  # path to the log file
 
   # journald:
   #     directory: /run/log/journal
@@ -64,9 +64,9 @@ exporters:
   #   tls:
   #     insecure: true
   otlphttp:
-    endpoint: "http://localhost:4318"
-    tls:
-      insecure: true
+    endpoint:  ${SIGNOZ_CLUSTER_ENDPOINT}  # "http://localhost:4318" or "https://metrics.openmined.org"
+    # tls:
+    #   insecure: true
   # file/no_rotation:
   #     path: ./otel-collector.json
 
