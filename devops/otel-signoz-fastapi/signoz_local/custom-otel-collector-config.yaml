@@ -1,6 +1,6 @@
 receivers:
   hostmetrics:
-    collection_interval: 5s  # Metrics collection frequency
+    collection_interval: 10s  # Metrics collection frequency
     scrapers:
       cpu:
         metrics:
@@ -39,17 +39,13 @@ receivers:
             enabled: true
           system.processes.count:
             enabled: true
-  filelog:
-    include: ${LOG_FILE_PATH}  # path to the log file
-
-  # journald:
-  #     directory: /run/log/journal
-  #     units:
-  #       - ssh
-  #       - kubelet
-  #       - docker
-  #       - containerd
-  #     priority: info
+  # filelog:
+  #   include: ${LOG_FILE_PATH}  # path to the log file
+  journald:
+    # directory: /run/log/journal
+    units:
+      - NetworkManager
+    priority: info
 
 processors:
   resourcedetection:
@@ -57,6 +53,14 @@ processors:
   batch:
     send_batch_size: 1000
     timeout: 10s
+  # attributes:
+  #   actions:
+  #     - key: service.name
+  #       value: "system-services"  # Set service name
+  #       action: upsert
+  #     - key: log.source
+  #       from_attribute: "_SYSTEMD_UNIT"
+  #       action: upsert
 
 exporters:
   # otlp:
@@ -64,9 +68,9 @@ exporters:
   #   tls:
   #     insecure: true
   otlphttp:
-    endpoint:  ${SIGNOZ_CLUSTER_ENDPOINT}  # "http://localhost:4318" or "https://metrics.openmined.org"
-    # tls:
-    #   insecure: true
+    endpoint: ${SIGNOZ_CLUSTER_ENDPOINT}  # "http://localhost:4318" or "https://metrics.openmined.org"
+    tls:
+      insecure: true
   # file/no_rotation:
   #     path: ./otel-collector.json
 
@@ -77,6 +81,6 @@ service:
       processors: [resourcedetection, batch]
       exporters: [otlphttp]
     logs:
-      receivers: [filelog]
+      receivers: [journald]
       processors: [batch]
       exporters: [otlphttp]
