@@ -1,86 +1,66 @@
 receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: localhost:5555
   hostmetrics:
-    collection_interval: 10s  # Metrics collection frequency
+    collection_interval: 30s
     scrapers:
       cpu:
         metrics:
-          system.cpu.time:
+          system.cpu.frequency:
             enabled: true
           system.cpu.utilization:
             enabled: true
       memory:
         metrics:
-          system.memory.usage:
-            enabled: true
           system.memory.utilization:
             enabled: true
-      disk:
+      paging:
         metrics:
-          system.disk.io:
-            enabled: true
-          system.disk.operations:
-            enabled: true
-      filesystem:
-        metrics:
-          system.filesystem.usage:
-            enabled: true
-          system.filesystem.utilization:
+          system.paging.utilization:
             enabled: true
       network:
         metrics:
-          system.network.connections:
-            enabled: true
-          system.network.io:
+          system.network.conntrack.count:
             enabled: true
       load:
+      disk:
+      filesystem:
       processes:
-        metrics:
-          system.processes.created:
-            enabled: true
-          system.processes.count:
-            enabled: true
-  # filelog:
-  #   include: ${LOG_FILE_PATH}  # path to the log file
-  journald:
-    # directory: /run/log/journal
-    units:
-      - NetworkManager
-    priority: info
 
 processors:
-  resourcedetection:
-    detectors: ["env", "system"]
   batch:
     send_batch_size: 1000
     timeout: 10s
-  # attributes:
-  #   actions:
-  #     - key: service.name
-  #       value: "system-services"  # Set service name
-  #       action: upsert
-  #     - key: log.source
-  #       from_attribute: "_SYSTEMD_UNIT"
-  #       action: upsert
+  resourcedetection:
+    detectors: ["system"]
+    timeout: 2s
+    system:
+      hostname_sources: ["os"]
+  resource:
+    attributes:
+      - key: syftbox.server.env
+        value: stage
+        action: upsert
 
 exporters:
-  # otlp:
-  #   endpoint: "localhost:4317"
-  #   tls:
-  #     insecure: true
-  otlphttp:
-    endpoint: ${SIGNOZ_CLUSTER_ENDPOINT}  # "http://localhost:4318" or "https://metrics.openmined.org"
+  otlp:
+    endpoint: http://localhost:4317
     tls:
       insecure: true
-  # file/no_rotation:
-  #     path: ./otel-collector.json
 
 service:
   pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [resourcedetection, resource, batch]
+      exporters: [otlp]
     metrics:
-      receivers: [hostmetrics]
-      processors: [resourcedetection, batch]
-      exporters: [otlphttp]
+      receivers: [otlp, hostmetrics]
+      processors: [resourcedetection, resource, batch]
+      exporters: [otlp]
     logs:
-      receivers: [journald]
-      processors: [batch]
-      exporters: [otlphttp]
+      receivers: [otlp]
+      processors: [resourcedetection, resource, batch]
+      exporters: [otlp]
