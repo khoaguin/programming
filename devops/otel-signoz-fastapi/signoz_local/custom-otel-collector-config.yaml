@@ -2,9 +2,9 @@ receivers:
   otlp:
     protocols:
       grpc:
-        endpoint: localhost:5555
+        endpoint: localhost:5555  # configure the app to send telemetry data to this endpoint
   hostmetrics:
-    collection_interval: 30s
+    collection_interval: 10s
     scrapers:
       cpu:
         metrics:
@@ -28,6 +28,8 @@ receivers:
       disk:
       filesystem:
       processes:
+  filelog:
+    include: ${LOG_FILE_PATH}  # path to the log file
 
 processors:
   batch:
@@ -60,7 +62,11 @@ service:
       receivers: [otlp, hostmetrics]
       processors: [resourcedetection, resource, batch]
       exporters: [otlp]
+    # logs:
+    #   receivers: [otlp]
+    #   processors: [resourcedetection, resource, batch]
+    #   exporters: [otlp]
     logs:
-      receivers: [otlp]
+      receivers: [filelog]
       processors: [resourcedetection, resource, batch]
       exporters: [otlp]
