@@ -1,14 +1,31 @@
 from typing import Union
 from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, ConfigDict
 from enum import Enum
+from typing import Optional
+from datetime import datetime
 
 
-class Item(BaseModel):
+class Base(BaseModel):
+    """Base model with enhanced serialization capabilities."""
+
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        json_encoders={
+            datetime: lambda dt: dt.isoformat(),
+        },
+        ser_json_bytes="base64",  #  encode any bytes fields as base64 strings during serialization
+        val_json_bytes="base64",  # 
+    )
+
+
+class Item(Base):
     name: str
     description: str | None = None
     price: float
     tax: float | None = None
+    body: Optional[bytes] = None
 
 
 class RPCStatusCode(Enum):
@@ -18,7 +35,7 @@ class RPCStatusCode(Enum):
     ERROR = "RPC_ERROR"
 
 
-class ItemResponse(BaseModel):
+class ItemResponse(Base):
     id: str
     status: RPCStatusCode
     items: Union[Item, list[Item]]
@@ -32,13 +49,14 @@ async def create_item(item: Item, item_id: int):
     item_dict: dict = item.model_dump()
     if item.tax is not None:
         price_with_tax = item.price + item.tax
-        item_dict.update({"price_with_tax": price_with_tax})
+        item_dict.update({"price_with_tax": price_with_tax, "body": b"hello world"})
     item_response = ItemResponse(
         id=str(item_id), 
         status=RPCStatusCode.COMPLETED,
-        items=Item(**item_dict)
+        items=[Item(**item_dict), Item(**item_dict)]
     )
-    return item_response
+    import pdb; pdb.set_trace()
+    return JSONResponse(content=item_response.model_dump(model="json"))
 
 
 if __name__ == "__main__":

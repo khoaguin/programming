@@ -4,6 +4,7 @@
  * @property {?string} [description=null] - Optional description of the item
  * @property {number} price - The price of the item
  * @property {?number} [tax=null] - Optional tax amount
+ * @property {string} body - JSON stringified body
  */
 
 /**
@@ -16,7 +17,7 @@ const myItem = {
     name: "Book",
     description: "A great book",
     price: 29.99,
-    tax: 2.50
+    tax: 2.50,
 };
 
 /**
@@ -51,6 +52,13 @@ try {
     });
     const data = await response.json();
     /** @type {ItemResponse} */
+
+    for (let item of data.items) {
+        // item.body = atob(item.body);
+        console.log('item = ', item);
+        console.log('item.body = ', atob(item.body));
+    }
+
     const itemResponse = {
         id: data.id,
         status: data.status,
