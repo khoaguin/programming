@@ -5,3 +5,4 @@ devops/dive-into-kcna/
 rust/zero2prod/
 fullstack-dev/full-stack-open/
 **/node_modules/
+.DS_store
